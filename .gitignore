@@ -1,0 +1,40 @@
+# ===== Segredos e configuração local (NUNCA versionar) =====
+config/application.properties
+config/application-*.properties
+!config/application.example.properties
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.jks
+
+# ===== Arquivos gerados pelo sistema (dados dos clientes) =====
+storage/**
+!storage/**/.gitkeep
+*.pdf
+
+# ===== Build =====
+target/
+out/
+*.class
+*.log
+hs_err_pid*
+
+# ===== IDEs =====
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.factorypath
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.metadata/
+
+# ===== Sistema operacional =====
+.DS_Store
+Thumbs.db
+desktop.ini

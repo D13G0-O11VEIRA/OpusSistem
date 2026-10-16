@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "OpusSistem",
+      "request": "launch",
+      "mainClass": "br.opussistem.Main",
+      "vmArgs": "--enable-native-access=ALL-UNNAMED",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

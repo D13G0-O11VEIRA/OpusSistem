@@ -1,0 +1,3 @@
+V001__esquema_inicial.sql
+V002__recursos_completos.sql
+V003__rodape_relatorio.sql

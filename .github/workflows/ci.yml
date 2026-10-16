@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build e testes (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "26"
+          cache: maven
+
+      # Os testes não precisam de MySQL nem de interface gráfica.
+      - name: Compilar e testar
+        run: mvn -B -ntp verify
+
+      # O JAR executável inclui as bibliotecas nativas do JavaFX da plataforma em que foi gerado.
+      - name: Gerar JAR executável
+        run: mvn -B -ntp -Pdist package -DskipTests
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: opussistem-${{ matrix.os }}
+          path: target/opussistem-dist.jar
+          if-no-files-found: error

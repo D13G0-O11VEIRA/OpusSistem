@@ -1,0 +1,184 @@
+OPUSSISTEM — POSSÍVEIS IMPLEMENTAÇÕES FUTURAS
+=============================================================
+
+Este documento reúne ideias de evolução para o OpusSistem, inspiradas em
+recursos que costumam existir em softwares de gestão de ordens de serviço
+(OS), manutenção (CMMS), field service e ERPs de serviços usados no Brasil.
+Não se baseia na documentação interna de nenhum produto específico: são
+funcionalidades frequentes nessas categorias de software.
+
+Como ler:
+  Prioridade:  A = alto impacto no dia a dia | B = útil | C = diferencial
+  Esforço:     P = pequeno | M = médio | G = grande (normalmente exige servidor)
+
+-------------------------------------------------------------
+0. O QUE JÁ EXISTE NO OPUSSISTEM
+-------------------------------------------------------------
+  - Login e cadastro de usuários (administrador e operador)
+  - Perfil com dados da empresa, logo opcional e padrões das OS
+  - Campos renomeáveis, campos extras, listas e modelos por segmento
+  - Cadastro, alteração, busca e reabertura de OS, com histórico completo
+  - Texto formatado (negrito, sublinhado, listas, cores) nos campos de documento
+  - Relatório de atendimento técnico em A4, com assinaturas no rodapé
+  - Assinatura digital desenhada (técnico e cliente) com código de verificação
+  - Assinatura em lote por cliente, com pacote de relatórios
+  - Alertas de preventivas (3, 2 e 1 mês) com programação de OS
+  - Exportar/importar em JSON, CSV, Excel e XML, com mapeamento de colunas
+
+-------------------------------------------------------------
+1. FLUXO DE TRABALHO E AGENDA
+-------------------------------------------------------------
+  [A][M] Quadro Kanban de OS (colunas por status, arrastar e soltar).
+  [A][M] Agenda/calendário de técnicos, com visão diária, semanal e mensal,
+         evitando conflito de horários.
+  [A][P] Prioridade da OS (baixa, normal, alta, emergência) com cor e
+         ordenação nas listas.
+  [A][M] Prazos e SLA: data limite, semáforo (no prazo, atenção, atrasada) e
+         alerta de OS atrasadas no dashboard.
+  [B][M] Planos de manutenção recorrentes: ao fechar uma preventiva, gerar
+         automaticamente a próxima OS conforme a periodicidade.
+  [B][M] Checklists por tipo de manutenção (preventiva, inspeção, calibração),
+         com itens obrigatórios e resultado impresso no relatório.
+  [B][P] Modelos de OS (templates) para serviços repetitivos.
+  [C][M] Fluxo de aprovação (ex.: OS acima de determinado valor exige aprovação).
+
+-------------------------------------------------------------
+2. EQUIPAMENTOS (ATIVOS)
+-------------------------------------------------------------
+  [A][M] Cadastro mestre de equipamentos, separado das OS, com histórico
+         completo por equipamento.
+  [A][M] Etiqueta com QR code por equipamento: ao ler com o celular, abre o
+         histórico ou uma nova OS já preenchida.
+  [B][M] Contratos de manutenção e garantias, com vencimento e alerta.
+  [B][P] Anexos por equipamento (manuais, certificados, fotos).
+  [B][M] Certificados de calibração com número, laboratório e validade.
+  [B][M] Indicadores de confiabilidade por equipamento (tempo médio entre
+         falhas e tempo médio de reparo).
+  [C][M] Criticidade do equipamento (A/B/C) influenciando a prioridade dos alertas.
+  [C][G] Árvore de ativos (setor > máquina > componente).
+
+-------------------------------------------------------------
+3. PEÇAS, ORÇAMENTO E FINANCEIRO
+-------------------------------------------------------------
+  [A][M] Peças e serviços na OS (item, quantidade, valor unitário), com total
+         automático no relatório.
+  [A][M] Orçamento com aprovação do cliente antes de iniciar a OS (a
+         aprovação pode usar o mesmo mecanismo de assinatura digital).
+  [B][G] Controle de estoque de peças, com baixa automática e alerta de
+         estoque mínimo.
+  [B][M] Registro de horas de mão de obra e custo por técnico.
+  [B][G] Faturamento: emissão de recibo, boleto/Pix e, se aplicável, NFS-e
+         por integração com emissor fiscal.
+  [C][M] Comissão de técnicos por OS fechada.
+  [C][M] Controle de contas a receber ligado às OS.
+
+-------------------------------------------------------------
+4. CLIENTE E ASSINATURA
+-------------------------------------------------------------
+  [A][M] Cadastro de clientes (CNPJ/CPF, contatos, endereços, equipamentos),
+         em vez de apenas o nome na OS.
+  [A][G] Assinatura remota: enviar um link ao cliente para revisar e assinar
+         o pacote no próprio celular (exige servidor).
+  [B][G] Assinatura com validade jurídica ampliada (certificado ICP-Brasil,
+         assinatura via gov.br ou provedores de assinatura eletrônica) e
+         carimbo de tempo. A assinatura atual é um registro local com código
+         de verificação, não uma assinatura qualificada.
+  [B][M] Portal do cliente: acompanhar OS, baixar relatórios e ver
+         equipamentos com vencimento próximo.
+  [B][M] Notificações por e-mail e WhatsApp (OS aberta, concluída, preventiva
+         próxima do vencimento).
+  [C][P] Pesquisa de satisfação (nota de 0 a 10) após o fechamento da OS.
+
+-------------------------------------------------------------
+5. TRABALHO EM CAMPO / MOBILE
+-------------------------------------------------------------
+  [A][M] Instalação como aplicativo (PWA) com uso offline e sincronização
+         quando houver conexão.
+  [A][P] Fotos antes/depois anexadas à OS, com legenda, aparecendo no relatório.
+  [B][M] Check-in e check-out com geolocalização e horário.
+  [B][G] Roteirização de visitas do dia.
+  [C][M] Leitura de código de barras do número de série.
+  [C][P] Voz para texto no laudo técnico.
+
+-------------------------------------------------------------
+6. GESTÃO, INDICADORES E CONTROLE
+-------------------------------------------------------------
+  [A][M] Permissões por perfil (quem pode fechar, reabrir, excluir, ver
+         valores, alterar configurações).
+  [A][M] Trilha de auditoria completa (quem alterou o quê, quando), além do
+         histórico da OS.
+  [A][M] Relatórios gerenciais: OS por período, por técnico, por cliente, por
+         tipo de manutenção, backlog, tempo médio de atendimento, custo.
+  [B][M] Painel configurável (o usuário escolhe os cartões e gráficos).
+  [B][G] Multiempresa e filiais, cada uma com logo, dados e numeração própria.
+  [B][P] Numeração por série (ex.: OS-2026-0001) e por filial.
+  [C][M] Metas e ranking de produtividade por técnico.
+
+-------------------------------------------------------------
+7. INTEGRAÇÕES E DADOS
+-------------------------------------------------------------
+  [A][G] Banco de dados em servidor, com sincronização entre dispositivos e
+         backup automático (hoje os dados ficam apenas no navegador).
+  [A][M] Perfis de mapeamento de importação salvos por origem (por exemplo,
+         um perfil para o layout do SHOficina), reaproveitados a cada importação.
+  [A][P] Layout de exportação exato do SHOficina e de outros sistemas, assim
+         que houver arquivos reais de exemplo para validar os cabeçalhos.
+  [B][G] API REST e webhooks para integrar com ERP, contabilidade e BI.
+  [B][M] Importação/exportação agendada (pasta, e-mail ou nuvem).
+  [C][M] Integração com planilhas online e ferramentas de BI.
+
+-------------------------------------------------------------
+8. SEGURANÇA E CONFORMIDADE
+-------------------------------------------------------------
+  [A][G] Autenticação real no servidor (senha com hash no servidor,
+         recuperação de senha, verificação em duas etapas). O login atual é
+         local e serve para organizar o uso, não como barreira de segurança.
+  [A][M] Registro de consentimento e política de retenção, conforme a LGPD.
+  [B][M] Criptografia dos dados em repouso e das assinaturas.
+  [B][P] Bloqueio automático por inatividade.
+  [C][M] Controle de sessões e dispositivos conectados.
+
+-------------------------------------------------------------
+9. INTELIGÊNCIA E AUTOMAÇÃO
+-------------------------------------------------------------
+  [B][M] Sugestão de natureza do serviço e laudo com base em OS anteriores
+         do mesmo equipamento.
+  [B][M] Resumo automático do histórico do equipamento antes da visita.
+  [C][G] Manutenção preditiva com dados de sensores (IoT) e previsão de falhas.
+  [C][M] Alertas inteligentes: priorizar equipamentos com falhas recorrentes.
+
+-------------------------------------------------------------
+10. ROADMAP SUGERIDO
+-------------------------------------------------------------
+  Fase 1 (próximas melhorias, sem servidor)
+    - Cadastro de clientes e equipamentos separados
+    - Prioridade e prazo (SLA) nas OS
+    - Peças e serviços com total no relatório
+    - Fotos anexadas e relatório com imagens
+    - Perfis de mapeamento de importação salvos
+
+  Fase 2 (produtividade)
+    - Kanban e agenda de técnicos
+    - Checklists por tipo de manutenção
+    - QR code por equipamento
+    - Planos de manutenção recorrentes
+    - Relatórios gerenciais e painel configurável
+
+  Fase 3 (com servidor)
+    - Banco de dados central e backup
+    - Login com segurança real e permissões por perfil
+    - Assinatura remota por link e notificações
+    - Portal do cliente e API
+    - Multiempresa
+
+-------------------------------------------------------------
+11. OBSERVAÇÕES SOBRE O SHOFICINA
+-------------------------------------------------------------
+  Não foi encontrada documentação pública do formato de importação ou
+  exportação do SHOficina. Por isso o OpusSistem oferece:
+    - um CSV em "layout oficina" (colunas genéricas de oficina mecânica);
+    - uma importação com mapeamento automático e ajustável de colunas, que
+      reconhece nomes comuns (placa, chassi, mecânico, situação, valor total).
+  Para chegar a um perfil exato, o ideal é exportar um arquivo de exemplo do
+  próprio SHOficina (pode ser só a linha de cabeçalho, sem dados de clientes)
+  e usá-lo para criar e testar o perfil de importação e exportação.

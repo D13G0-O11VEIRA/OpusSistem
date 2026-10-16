@@ -1,0 +1,3 @@
+﻿Número da OS;Cliente;Telefone;Equipamento;Modelo;Fabricante;Patrimônio;Nº de série;Status do equipamento;Data de entrada;Tipo de manutenção;Previsão de entrega;Próxima preventiva;Técnico;Natureza do serviço;Laudo técnico;Observações;Valor previsto;Valor final;Data de saída;Status da OS;Rodapé do relatório
+;Cliente Exemplo Ltda;(00) 00000-0000;Monitor Multiparamétrico;B850;Fabricante X;312;MP31277;Operante;05/10/2026;Preventiva;;05/04/2027;Maria Souza;Manutenção preventiva programada;Equipamento revisado e calibrado;;300,00;350,00;07/10/2026;Fechada;Dúvidas sobre este relatório: contato@cliente-exemplo.com
+;Cliente Exemplo Ltda;;Bomba de Infusão;SP600;Fabricante Y;221;BI22111;Em observação;12/10/2026;Corretiva;;;João Lima;Equipamento não liga;;;;;;Aberta;
