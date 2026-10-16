@@ -8,6 +8,7 @@ config/application-*.properties
 *.key
 *.p12
 *.jks
+docs/**
 
 # ===== Arquivos gerados pelo sistema (dados dos clientes) =====
 storage/**
