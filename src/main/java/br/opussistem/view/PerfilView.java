@@ -2,6 +2,7 @@ package br.opussistem.view;
 
 import br.opussistem.App;
 import br.opussistem.controller.Contexto;
+import br.opussistem.controller.Marca;
 import br.opussistem.controller.Navegador;
 import br.opussistem.controller.Rota;
 import br.opussistem.exception.AppException;
@@ -9,9 +10,9 @@ import br.opussistem.model.PerfilUsuario;
 import br.opussistem.model.RodapeCliente;
 import br.opussistem.model.Usuario;
 import br.opussistem.service.ConfiguracaoService;
+import br.opussistem.service.LogoService;
 import br.opussistem.service.RodapeService;
 import br.opussistem.service.Rotulos;
-import br.opussistem.util.Armazenamento;
 import br.opussistem.util.Formatos;
 import br.opussistem.view.componentes.AbasChip;
 import br.opussistem.view.componentes.Dialogos;
@@ -21,29 +22,37 @@ import br.opussistem.view.componentes.Toast;
 import br.opussistem.view.componentes.Ui;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.IntConsumer;
 
 /**
  * Perfil do usuário (clicando no nome, no topo) e configurações do sistema. Os dados da empresa e
@@ -195,6 +204,7 @@ public class PerfilView extends Tela {
             Map<String, String> valores = c.valores();
             exigirInteiro(valores.get(ConfiguracaoService.REL_VALIDADE_DIAS), "Validade em dias");
             Contexto.CONFIG.salvar(valores);
+            Marca.atualizar();
             Toast.mostrar("Dados salvos");
         });
         return new VBox(16,
@@ -204,35 +214,114 @@ public class PerfilView extends Tela {
                 Ui.acoes(salvar));
     }
 
+    /**
+     * Logo da empresa. Começa vazia; depois de enviada aparece no menu lateral e no cabeçalho do relatório, nos tamanhos
+     * escolhidos com as barras deslizantes (prévia ao vivo; o valor é salvo ao soltar a barra).
+     */
     private VBox logo() {
-        Path arquivo = Armazenamento.logo();
-        VBox card = Ui.card("Logo",
-                new Label("A logo começa vazia. Quando você envia uma imagem, ela aparece no cabeçalho dos relatórios e na tela de login."));
-        if (Files.exists(arquivo)) {
-            card.getChildren().add(new ImageView(new Image(arquivo.toUri().toString(), 220, 80, true, true)));
-        } else {
+        LogoService logos = Contexto.LOGO;
+        Label intro = new Label("A logo da sua empresa começa vazia. Depois que você enviar uma imagem, ela aparece no menu "
+                + "lateral e no cabeçalho dos relatórios. A logo do OpusSistem aparece apenas dentro do programa, "
+                + "nunca nos relatórios.");
+        intro.setWrapText(true);
+        VBox card = Ui.card("Logo da empresa", intro);
+
+        Optional<byte[]> atual = logos.imagem();
+        if (atual.isEmpty()) {
             Label vazio = new Label("Nenhuma logo cadastrada.");
             vazio.getStyleClass().add("dica-texto");
             card.getChildren().add(vazio);
+        } else {
+            Image imagem = new Image(new ByteArrayInputStream(atual.get()));
+            card.getChildren().addAll(
+                    controleTamanho("Tamanho no menu lateral", "px", imagem, logos.tamanhoMenu(),
+                            LogoService.MENU_MIN, LogoService.MENU_MAX, true, valor -> {
+                                logos.salvarTamanhoMenu(valor);
+                                Marca.atualizar();
+                            }),
+                    controleTamanho("Tamanho no relatório", "pt", imagem, logos.tamanhoRelatorio(),
+                            LogoService.RELATORIO_MIN, LogoService.RELATORIO_MAX, false, logos::salvarTamanhoRelatorio));
         }
-        card.getChildren().add(Ui.linha(
-                Ui.secundario("Escolher logo...", () -> {
-                    FileChooser escolha = new FileChooser();
-                    escolha.setTitle("Escolher logo");
-                    escolha.getExtensionFilters().add(new FileChooser.ExtensionFilter("Imagens", "*.png", "*.jpg", "*.jpeg"));
-                    File f = escolha.showOpenDialog(Ui.janela(card));
-                    if (f != null) {
-                        Armazenamento.copiar(f.toPath(), Armazenamento.logo());
-                        Toast.mostrar("Logo salva. Ela aparece nos relatórios agora e no menu no próximo login.");
-                        Navegador.ir(Rota.PERFIL);
-                    }
-                }),
-                Ui.perigo("Remover logo", () -> {
-                    Armazenamento.apagarSilencioso(Armazenamento.logo());
-                    Toast.mostrar("Logo removida");
-                    Navegador.ir(Rota.PERFIL);
-                })));
+
+        Button escolher = Ui.secundario(atual.isPresent() ? "Trocar logo..." : "Enviar logo...", () -> {
+            FileChooser escolha = new FileChooser();
+            escolha.setTitle("Escolher a logo da empresa");
+            escolha.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("Imagens", "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp"));
+            File arquivo = escolha.showOpenDialog(Ui.janela(card));
+            if (arquivo != null) {
+                byte[] bytes;
+                try {
+                    bytes = Files.readAllBytes(arquivo.toPath());
+                } catch (IOException e) {
+                    throw new AppException("Não foi possível ler o arquivo: " + e.getMessage(), e);
+                }
+                logos.salvar(bytes);
+                Marca.atualizar();
+                Toast.mostrar("Logo salva");
+                Navegador.ir(Rota.PERFIL);
+            }
+        });
+        HBox botoes = new HBox(8, escolher);
+        if (atual.isPresent()) {
+            botoes.getChildren().add(Ui.secundario("Tamanhos padrão", () -> {
+                logos.restaurarTamanhos();
+                Marca.atualizar();
+                Navegador.ir(Rota.PERFIL);
+            }));
+            botoes.getChildren().add(Ui.perigo("Remover logo", () -> {
+                logos.remover();
+                Marca.atualizar();
+                Toast.mostrar("Logo removida");
+                Navegador.ir(Rota.PERFIL);
+            }));
+        }
+        card.getChildren().add(botoes);
         return card;
+    }
+
+    /** Barra deslizante + prévia (sobre o azul do menu ou sobre a folha branca do relatório). */
+    private VBox controleTamanho(String titulo, String unidade, Image imagem, int inicial, int minimo, int maximo,
+            boolean sobreMenu, IntConsumer salvar) {
+        Slider barra = new Slider(minimo, maximo, inicial);
+        barra.setBlockIncrement(5);
+        HBox.setHgrow(barra, Priority.ALWAYS);
+        barra.setMaxWidth(Double.MAX_VALUE);
+        Label valor = new Label(inicial + " " + unidade);
+        valor.setMinWidth(64);
+
+        ImageView previa = new ImageView(imagem);
+        previa.setPreserveRatio(true);
+        previa.setSmooth(true);
+        previa.setFitWidth(inicial);
+        previa.setFitHeight(inicial);
+        StackPane faixa = new StackPane(previa);
+        faixa.setAlignment(Pos.CENTER_LEFT);
+        faixa.setPadding(new Insets(12));
+        faixa.setMinHeight(minimo + 24);
+        faixa.setStyle(sobreMenu
+                ? "-fx-background-color: -cor-menu; -fx-background-radius: 8;"
+                : "-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: -cor-borda; -fx-border-radius: 8;");
+
+        Runnable salvarAgora = () -> Ui.executar(() -> salvar.accept((int) Math.round(barra.getValue())));
+        barra.valueProperty().addListener((obs, antes, depois) -> {
+            int v = (int) Math.round(depois.doubleValue());
+            valor.setText(v + " " + unidade);
+            previa.setFitWidth(v);
+            previa.setFitHeight(v);
+            if (!barra.isValueChanging()) {
+                salvarAgora.run();
+            }
+        });
+        barra.valueChangingProperty().addListener((obs, antes, mudando) -> {
+            if (!mudando) {
+                salvarAgora.run();
+            }
+        });
+
+        Label dica = new Label(minimo + " a " + maximo + " " + unidade + " no maior lado da imagem");
+        dica.getStyleClass().add("dica-texto");
+        return new VBox(6, Ui.campo(titulo, new HBox(10, barra, valor)), dica, faixa);
     }
 
     // ------------------------------------------------------------ rodapés por cliente

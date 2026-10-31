@@ -4,8 +4,8 @@
 
 | Versão | Suporte |
 |---|---|
-| 1.1.x | ✅ |
-| < 1.1 | ❌ |
+| 1.2.x | ✅ |
+| < 1.2 | ❌ |
 
 ## Como relatar uma vulnerabilidade
 

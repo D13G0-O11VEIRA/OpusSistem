@@ -6,6 +6,7 @@ import br.opussistem.util.MigradorBanco;
 import br.opussistem.view.LoginView;
 import br.opussistem.view.MainView;
 import br.opussistem.view.componentes.Fontes;
+import br.opussistem.view.componentes.IconeApp;
 import br.opussistem.view.componentes.Tema;
 import br.opussistem.view.componentes.Ui;
 import javafx.application.Application;
@@ -36,6 +37,7 @@ public class App extends Application {
         servicos = getHostServices();
         Fontes.carregar();
         palco.setTitle("OpusSistem");
+        IconeApp.aplicar(palco);
         palco.setMinWidth(1100);
         palco.setMinHeight(700);
         cena = new Scene(new StackPane(), 1320, 820);

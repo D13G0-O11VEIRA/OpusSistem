@@ -142,6 +142,20 @@ public class OrdemServicoService {
         });
     }
 
+    /** Fecha a OS (grava a data de entrega e registra no histórico). Não faz nada se já estiver fechada. */
+    public OrdemServico fechar(long id, Usuario autor) {
+        return Transacao.executar(c -> {
+            OrdemServico os = osDao.buscarPorId(c, id).orElseThrow(() -> new AppException("OS não encontrada."));
+            if (os.getStatus() == StatusOS.FECHADA) {
+                return os;
+            }
+            osDao.atualizarStatus(c, id, StatusOS.FECHADA, LocalDateTime.now().withNano(0));
+            historicoDao.inserir(c, eventoDeStatus(id, StatusOS.FECHADA,
+                    "Status alterado de " + os.getStatus().getRotulo() + " para " + StatusOS.FECHADA.getRotulo() + ".", autor));
+            return osDao.buscarPorId(c, id).orElseThrow();
+        });
+    }
+
     public OrdemServico reabrir(long id, String motivo, Usuario autor) {
         if (motivo == null || motivo.isBlank()) {
             throw new AppException("Informe o motivo da reabertura.");

@@ -1,11 +1,12 @@
 package br.opussistem.view;
 
 import br.opussistem.controller.Contexto;
+import br.opussistem.controller.Marca;
 import br.opussistem.controller.Navegador;
 import br.opussistem.controller.Rota;
 import br.opussistem.model.OrdemServico;
 import br.opussistem.service.ConfiguracaoService;
-import br.opussistem.util.Armazenamento;
+import br.opussistem.view.componentes.IconeApp;
 import br.opussistem.view.componentes.Icones;
 import br.opussistem.view.componentes.Toast;
 import br.opussistem.view.componentes.Ui;
@@ -25,8 +26,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.ByteArrayInputStream;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -41,6 +41,7 @@ public class MainView extends StackPane {
     private final Map<Rota, StackPane> selos = new EnumMap<>(Rota.class);
     private final Button botaoUsuario = new Button();
     private final Label tituloApp = new Label();
+    private final VBox topoMarca = new VBox(8);
 
     public MainView(Runnable aoSair) {
         BorderPane layout = new BorderPane();
@@ -50,6 +51,7 @@ public class MainView extends StackPane {
         getChildren().add(layout);
         Toast.registrar(this);
         Navegador.registrar(this::mostrar);
+        Marca.registrar(this::montarMarca);
         mostrar(Rota.DASHBOARD, null);
     }
 
@@ -62,23 +64,9 @@ public class MainView extends StackPane {
         menu.setMinWidth(222);
         menu.setMaxWidth(222);
 
-        Label opus = new Label("Opus");
-        opus.getStyleClass().add("marca-opus");
-        Label sistem = new Label("Sistem");
-        sistem.getStyleClass().add("marca-sistem");
-        VBox topo = new VBox(6, new HBox(0, opus, sistem));
-        Path logo = Armazenamento.logo();
-        if (Files.exists(logo)) {
-            topo.getChildren().add(new ImageView(new Image(logo.toUri().toString(), 150, 56, true, true)));
-        }
-        String fantasia = Contexto.CONFIG.get(ConfiguracaoService.EMPRESA_FANTASIA);
-        if (!fantasia.isBlank()) {
-            Label nome = new Label(fantasia);
-            nome.getStyleClass().add("marca-empresa");
-            topo.getChildren().add(nome);
-        }
-        topo.setPadding(new Insets(0, 0, 18, 8));
-        menu.getChildren().add(topo);
+        topoMarca.setPadding(new Insets(0, 0, 18, 8));
+        montarMarca();
+        menu.getChildren().add(topoMarca);
 
         for (Rota rota : Rota.values()) {
             if (rota.noMenu()) {
@@ -86,6 +74,48 @@ public class MainView extends StackPane {
             }
         }
         return menu;
+    }
+
+    /**
+     * Topo do menu: marca do OpusSistem (sempre) e, abaixo, a logo e o nome fantasia da empresa do usuário. A logo da
+     * empresa só aparece depois de enviada em Perfil > Empresa e relatório, com o tamanho escolhido lá.
+     */
+    private void montarMarca() {
+        topoMarca.getChildren().clear();
+
+        HBox marca = new HBox(8);
+        marca.setAlignment(Pos.CENTER_LEFT);
+        Image monograma = IconeApp.monograma();
+        if (monograma != null) {
+            ImageView vista = new ImageView(monograma);
+            vista.setFitHeight(30);
+            vista.setPreserveRatio(true);
+            vista.setSmooth(true);
+            marca.getChildren().add(vista);
+        }
+        Label opus = new Label("Opus");
+        opus.getStyleClass().add("marca-opus");
+        Label sistem = new Label("Sistem");
+        sistem.getStyleClass().add("marca-sistem");
+        marca.getChildren().add(new HBox(0, opus, sistem));
+        topoMarca.getChildren().add(marca);
+
+        Contexto.LOGO.imagem().ifPresent(bytes -> {
+            int lado = Contexto.LOGO.tamanhoMenu();
+            ImageView logoEmpresa = new ImageView(new Image(new ByteArrayInputStream(bytes)));
+            logoEmpresa.setPreserveRatio(true);
+            logoEmpresa.setSmooth(true);
+            logoEmpresa.setFitWidth(lado);
+            logoEmpresa.setFitHeight(lado);
+            VBox.setMargin(logoEmpresa, new Insets(12, 0, 0, 0));
+            topoMarca.getChildren().add(logoEmpresa);
+        });
+        String fantasia = Contexto.CONFIG.get(ConfiguracaoService.EMPRESA_FANTASIA);
+        if (!fantasia.isBlank()) {
+            Label nome = new Label(fantasia);
+            nome.getStyleClass().add("marca-empresa");
+            topoMarca.getChildren().add(nome);
+        }
     }
 
     private ToggleButton itemDoMenu(Rota rota) {

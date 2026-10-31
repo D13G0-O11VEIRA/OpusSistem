@@ -57,10 +57,12 @@ public class RelatorioService {
     private final ConfiguracaoService config = ConfiguracaoService.instancia();
     private final AssinaturaService assinaturas;
     private final RodapeService rodapes;
+    private final LogoService logos;
 
-    public RelatorioService(AssinaturaService assinaturas, RodapeService rodapes) {
+    public RelatorioService(AssinaturaService assinaturas, RodapeService rodapes, LogoService logos) {
         this.assinaturas = assinaturas;
         this.rodapes = rodapes;
+        this.logos = logos;
     }
 
     /** Gera storage/relatorios/&lt;numero&gt;.pdf e devolve o caminho. */
@@ -202,16 +204,26 @@ public class RelatorioService {
                 linhas.add(new Phrase(registro.trim(), fonte(9, Font.NORMAL, Color.BLACK)));
             }
         }
-        Path logo = Armazenamento.logo();
-        boolean temLogo = Files.exists(logo);
+        // A logo é opcional: só sai no relatório se o usuário a enviou em Perfil > Empresa e relatório.
+        Image img = null;
+        if (logos.existe()) {
+            try {
+                float lado = logos.tamanhoRelatorio();
+                img = Image.getInstance(logos.imagem().orElseThrow());
+                img.scaleToFit(lado, lado);
+            } catch (RuntimeException | IOException e) {
+                img = null; // imagem inválida: o relatório sai sem logo
+            }
+        }
+        boolean temLogo = img != null;
         if (linhas.isEmpty() && !temLogo) {
             return;
         }
-        PdfPTable t = new PdfPTable(temLogo ? new float[] { 18, 82 } : new float[] { 100 });
+        float larguraUtil = doc.right() - doc.left();
+        float colunaLogo = temLogo ? Math.min(logos.tamanhoRelatorio() + 14f, larguraUtil * 0.6f) : 0;
+        PdfPTable t = new PdfPTable(temLogo ? new float[] { colunaLogo, larguraUtil - colunaLogo } : new float[] { 100 });
         t.setWidthPercentage(100);
         if (temLogo) {
-            Image img = Image.getInstance(logo.toAbsolutePath().toString());
-            img.scaleToFit(80, 50);
             PdfPCell cl = new PdfPCell(img, false);
             cl.setBorder(Rectangle.BOTTOM);
             cl.setPaddingBottom(6);

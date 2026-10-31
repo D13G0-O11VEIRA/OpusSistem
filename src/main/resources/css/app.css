@@ -302,3 +302,8 @@
 .dialog-pane { -fx-background-color: -cor-card; }
 .dialog-pane .label { -fx-text-fill: -cor-texto; }
 .tooltip { -fx-font-size: 12px; }
+
+/* ---------- barra deslizante (tamanho da logo) ---------- */
+.slider .track { -fx-background-color: -cor-borda; -fx-background-radius: 4; -fx-pref-height: 6; }
+.slider .thumb { -fx-background-color: -cor-destaque; -fx-background-radius: 999; -fx-background-insets: 0; -fx-padding: 7; }
+.slider:focused .thumb { -fx-background-color: -cor-destaque; -fx-effect: dropshadow(gaussian, rgba(47,111,228,0.45), 6, 0, 0, 0); }

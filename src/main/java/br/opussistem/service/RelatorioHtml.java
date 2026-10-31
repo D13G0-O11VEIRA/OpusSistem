@@ -3,15 +3,11 @@ package br.opussistem.service;
 import br.opussistem.model.Assinatura;
 import br.opussistem.model.OrdemServico;
 import br.opussistem.model.PapelAssinatura;
-import br.opussistem.util.Armazenamento;
 import br.opussistem.util.Formatos;
 import br.opussistem.util.Html;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -35,7 +31,7 @@ public class RelatorioHtml {
               display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-direction:column;flex-direction:column;
               box-shadow:0 2px 10px rgba(0,0,0,.20)}
             .rh{display:-webkit-box;display:flex;align-items:center;padding-bottom:8px;border-bottom:1px solid #999}
-            .rh img{max-height:52px;max-width:90px;margin-right:12px}
+            .rh img{margin-right:12px}
             h2{text-align:center;font-size:17px;margin:14px 0}
             h4{text-align:center;font-size:13px;margin:12px 0 4px}
             table.in{width:100%;border-collapse:collapse}
@@ -61,11 +57,13 @@ public class RelatorioHtml {
 
     private final AssinaturaService assinaturas;
     private final RodapeService rodapes;
+    private final LogoService logos;
     private final ConfiguracaoService config = ConfiguracaoService.instancia();
 
-    public RelatorioHtml(AssinaturaService assinaturas, RodapeService rodapes) {
+    public RelatorioHtml(AssinaturaService assinaturas, RodapeService rodapes, LogoService logos) {
         this.assinaturas = assinaturas;
         this.rodapes = rodapes;
+        this.logos = logos;
     }
 
     /** Documento completo de uma OS (uma folha). */
@@ -169,8 +167,10 @@ public class RelatorioHtml {
         if (linhas.isEmpty() && logo == null) {
             return "";
         }
-        return "<div class=\"rh\">" + (logo == null ? "" : "<img src=\"" + logo + "\" alt=\"\">") + "<div>"
-                + String.join("<br>", linhas) + "</div></div>";
+        int lado = logos.tamanhoRelatorio(); // 1 pt do PDF = 1 px nesta prévia (folha de 595 px)
+        return "<div class=\"rh\">" + (logo == null ? ""
+                : "<img src=\"" + logo + "\" alt=\"\" style=\"max-width:" + lado + "px;max-height:" + lado + "px\">")
+                + "<div>" + String.join("<br>", linhas) + "</div></div>";
     }
 
     private static void adicionar(List<String> linhas, String r1, String v1, String r2, String v2, String r3, String v3) {
@@ -251,15 +251,7 @@ public class RelatorioHtml {
         return limpo.isBlank() ? "&nbsp;" : limpo;
     }
 
-    private static String logoComoDados() {
-        Path logo = Armazenamento.logo();
-        if (!Files.exists(logo)) {
-            return null;
-        }
-        try {
-            return "data:image/png;base64," + Base64.getEncoder().encodeToString(Files.readAllBytes(logo));
-        } catch (IOException e) {
-            return null;
-        }
+    private String logoComoDados() {
+        return logos.imagem().map(b -> "data:image/png;base64," + Base64.getEncoder().encodeToString(b)).orElse(null);
     }
 }

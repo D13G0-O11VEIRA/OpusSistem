@@ -27,6 +27,7 @@ public final class Dialogos {
         a.setTitle("OpusSistem");
         a.setHeaderText(null);
         a.getDialogPane().getStylesheets().add(Ui.css());
+        IconeApp.aplicar(a.getDialogPane().getScene().getWindow());
         return a.showAndWait().orElse(ButtonType.NO) == ButtonType.YES;
     }
 
@@ -35,6 +36,7 @@ public final class Dialogos {
         a.setTitle("OpusSistem");
         a.setHeaderText(null);
         a.getDialogPane().getStylesheets().add(Ui.css());
+        IconeApp.aplicar(a.getDialogPane().getScene().getWindow());
         a.showAndWait();
     }
 
@@ -50,6 +52,7 @@ public final class Dialogos {
         d.getDialogPane().getStylesheets().add(Ui.css());
         d.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         d.setResultConverter(botao -> botao == ButtonType.OK ? area.getText() : null);
+        IconeApp.aplicar(d.getDialogPane().getScene().getWindow());
         Platform.runLater(area::requestFocus);
         return d.showAndWait();
     }

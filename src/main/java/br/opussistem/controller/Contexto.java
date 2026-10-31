@@ -7,6 +7,7 @@ import br.opussistem.service.AuthService;
 import br.opussistem.service.ConfiguracaoService;
 import br.opussistem.service.DashboardService;
 import br.opussistem.service.ImportExportService;
+import br.opussistem.service.LogoService;
 import br.opussistem.service.OrdemServicoService;
 import br.opussistem.service.RelatorioHtml;
 import br.opussistem.service.RelatorioService;
@@ -22,8 +23,9 @@ public final class Contexto {
     public static final DashboardService DASHBOARD = new DashboardService(ALERTAS);
     public static final AssinaturaService ASSINATURAS = new AssinaturaService();
     public static final RodapeService RODAPES = new RodapeService();
-    public static final RelatorioService RELATORIOS = new RelatorioService(ASSINATURAS, RODAPES);
-    public static final RelatorioHtml PREVIA = new RelatorioHtml(ASSINATURAS, RODAPES);
+    public static final LogoService LOGO = new LogoService();
+    public static final RelatorioService RELATORIOS = new RelatorioService(ASSINATURAS, RODAPES, LOGO);
+    public static final RelatorioHtml PREVIA = new RelatorioHtml(ASSINATURAS, RODAPES, LOGO);
     public static final ImportExportService IMPORT_EXPORT = new ImportExportService(OS);
 
     private static Usuario usuario;

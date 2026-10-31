@@ -55,6 +55,7 @@ public final class DialogoAssinatura {
                 ev.consume();
             }
         });
+        IconeApp.aplicar(dialogo.getDialogPane().getScene().getWindow());
         dialogo.setResultConverter(botao -> botao == assinar
                 ? new Resultado(nome.getText().trim(), Ui.valor(email), painel.png()) : null);
         return dialogo.showAndWait();

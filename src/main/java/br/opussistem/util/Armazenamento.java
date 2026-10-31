@@ -30,10 +30,6 @@ public final class Armazenamento {
         return garantir(raiz().resolve("ordens").resolve(nomeSeguro(numeroOs)));
     }
 
-    public static Path logo() {
-        return raiz().resolve("logo.png");
-    }
-
     public static Path garantir(Path pasta) {
         try {
             Files.createDirectories(pasta);

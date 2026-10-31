@@ -11,7 +11,9 @@ import br.opussistem.service.ConfiguracaoService;
 import br.opussistem.service.Rotulos;
 import br.opussistem.service.RodapeService;
 import br.opussistem.util.Formatos;
+import br.opussistem.util.Html;
 import br.opussistem.view.componentes.DialogoAssinatura;
+import br.opussistem.view.componentes.Dialogos;
 import br.opussistem.view.componentes.PreviaRelatorio;
 import br.opussistem.view.componentes.Tabela;
 import br.opussistem.view.componentes.Toast;
@@ -24,6 +26,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
@@ -143,16 +146,26 @@ public class RelatoriosView extends Tela {
             caixa.getChildren().addAll(chip, Ui.pequeno(Ui.secundario("×", () -> remover(os, papel))));
         } else {
             Button assinar = Ui.pequeno(Ui.secundario("Assinar como " + rotulo.toLowerCase(), () -> assinar(os, papel)));
-            assinar.setDisable(os.getStatus() != StatusOS.FECHADA);
+            if (os.getStatus() != StatusOS.FECHADA) {
+                assinar.setTooltip(new Tooltip("A OS ainda está aberta: o programa pergunta se deve fechá-la antes de assinar."));
+            }
             caixa.getChildren().add(assinar);
         }
         return caixa;
     }
 
-    private void assinar(OrdemServico os, PapelAssinatura papel) {
+    private void assinar(OrdemServico escolhida, PapelAssinatura papel) {
+        OrdemServico os = Contexto.OS.buscar(escolhida.getId()).orElse(escolhida);
         if (os.getStatus() != StatusOS.FECHADA) {
-            Toast.mostrar("Feche a OS antes de assinar.");
-            return;
+            String aviso = "A OS " + os.getNumero() + " ainda não está fechada. A assinatura vale para o relatório final, "
+                    + "por isso a OS precisa ser fechada antes."
+                    + (Html.vazio(os.getLaudoTecnico()) ? "\n\nAtenção: o laudo técnico desta OS está vazio." : "")
+                    + "\n\nFechar a OS agora e continuar com a assinatura?";
+            if (!Dialogos.confirmar(aviso)) {
+                return;
+            }
+            os = Contexto.OS.fechar(os.getId(), Contexto.usuario());
+            recarregar(os.getId()); // atualiza o status na lista e o painel da direita
         }
         boolean porCliente = papel == PapelAssinatura.CLIENTE;
         byte[] salva = porCliente ? null : Contexto.AUTH.lerAssinatura(Contexto.usuario()).orElse(null);
@@ -163,8 +176,16 @@ public class RelatoriosView extends Tela {
             DialogoAssinatura.Resultado d = r.get();
             Contexto.ASSINATURAS.assinar(os.getId(), papel, d.nome(), d.email(), d.png(), Contexto.usuario());
             Toast.mostrar("Assinatura registrada");
-            abrir(os);
+            recarregar(os.getId());
         }
+    }
+
+    /** Refaz a lista e seleciona de novo a OS (mantém o painel da direita em dia). */
+    private void recarregar(long id) {
+        pesquisar();
+        tabela.view().getItems().stream().filter(o -> o.getId() == id).findFirst().ifPresentOrElse(
+                o -> tabela.view().getSelectionModel().select(o),
+                () -> Contexto.OS.buscar(id).ifPresent(this::abrir));
     }
 
     private void remover(OrdemServico os, PapelAssinatura papel) {

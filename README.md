@@ -19,7 +19,7 @@ preventivas e importação/exportação de dados.
 | **Assinatura em lote** | O cliente assina uma vez e a assinatura vale para todos os relatórios do pacote |
 | **Alertas de preventivas** | Avisos 3, 2 e 1 mês antes do vencimento, programação de OS preventiva e regras ajustáveis |
 | **Exportar / Importar** | CSV e JSON; importa arquivos de outros sistemas com mapeamento automático de colunas |
-| **Personalização** | Logo, dados da empresa, nomes dos campos (ex.: Patrimônio → Placa), listas, cores e tema claro/escuro |
+| **Personalização** | Logo da empresa (opcional, com tamanho ajustável no menu e no relatório), dados da empresa, nomes dos campos (ex.: Patrimônio → Placa), listas, cores e tema claro/escuro |
 
 ## Como rodar
 
@@ -43,6 +43,13 @@ preventivas e importação/exportação de dados.
 | `mvn -Pdist package` | gera `target/opussistem-dist.jar` (executável com `java -jar`; contém o JavaFX da plataforma atual) |
 | `mvn exec:java` | alternativa ao `javafx:run` |
 
+### Logo da empresa e ícone do aplicativo
+- O sistema **vem sem logo de empresa**. Ela só aparece (no menu lateral e nos relatórios) depois que o usuário a envia em
+  **Perfil → Empresa e relatório → Logo da empresa**, onde duas barras deslizantes ajustam o tamanho no menu e no relatório.
+- A logo fica guardada no **banco de dados**, então um banco novo nunca herda a logo de outra instalação.
+- A logo e o ícone do **OpusSistem** aparecem só dentro do programa (janela, login e menu). Ícones para instaladores
+  estão em [`packaging/`](packaging/README.md).
+
 ### Fonte Inter (opcional)
 O visual usa a fonte **Inter**. Ela não vem no repositório: sem ela o programa usa Segoe UI/fonte do sistema.
 Para ficar idêntico, veja [`src/main/resources/fonts/LEIA-ME.md`](src/main/resources/fonts/LEIA-ME.md).
@@ -59,7 +66,8 @@ OpusSistem/
 │  └─ criar-usuario.sql       usuário MySQL dedicado
 ├─ docs/                      arquitetura, rodapé do relatório, como publicar no GitHub, ideias
 ├─ templates/                 modelo-importacao.csv
-├─ storage/                   gerado em uso: assinaturas, PDFs, anexos, logo (fora do Git)
+├─ packaging/                 ícones (.ico, .icns, .png) e instruções do jpackage
+├─ storage/                   gerado em uso: assinaturas, PDFs e anexos (fora do Git)
 ├─ src/main/java/br/opussistem/
 │  ├─ Main.java · App.java    entrada e aplicação JavaFX
 │  ├─ config/ model/ dao/ service/ controller/ view/ util/ exception/

@@ -2,8 +2,7 @@ package br.opussistem.view;
 
 import br.opussistem.controller.Contexto;
 import br.opussistem.model.Usuario;
-import br.opussistem.service.ConfiguracaoService;
-import br.opussistem.util.Armazenamento;
+import br.opussistem.view.componentes.IconeApp;
 import br.opussistem.view.componentes.Toast;
 import br.opussistem.view.componentes.Ui;
 import javafx.geometry.Insets;
@@ -21,8 +20,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.function.Consumer;
 
 /** Tela inicial: "Entrar" e "Criar conta" lado a lado em abas (igual à versão web). */
@@ -52,9 +49,14 @@ public class LoginView extends StackPane {
         cartao.getChildren().clear();
         cartao.setAlignment(Pos.TOP_CENTER);
 
-        Path logo = Armazenamento.logo();
-        if (Files.exists(logo)) {
-            cartao.getChildren().add(new ImageView(new Image(logo.toUri().toString(), 200, 64, true, true)));
+        Image icone = IconeApp.icone(128);
+        if (icone != null) {
+            ImageView vista = new ImageView(icone);
+            vista.setFitWidth(76);
+            vista.setFitHeight(76);
+            vista.setPreserveRatio(true);
+            vista.setSmooth(true);
+            cartao.getChildren().add(vista);
         }
         Label opus = new Label("Opus");
         opus.getStyleClass().add("marca-login-opus");
@@ -62,8 +64,7 @@ public class LoginView extends StackPane {
         sistem.getStyleClass().add("marca-login-sistem");
         HBox marca = new HBox(0, opus, sistem);
         marca.setAlignment(Pos.CENTER);
-        String fantasia = Contexto.CONFIG.get(ConfiguracaoService.EMPRESA_FANTASIA);
-        Label sub = new Label(fantasia.isBlank() ? "Gestão de ordens de serviço" : fantasia);
+        Label sub = new Label("Gestão de ordens de serviço");
         sub.getStyleClass().add("subtitulo");
         VBox titulos = new VBox(0, marca, sub);
         titulos.setAlignment(Pos.CENTER);
