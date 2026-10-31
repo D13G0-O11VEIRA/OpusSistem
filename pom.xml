@@ -25,7 +25,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>26</maven.compiler.release>
-        <javafx.version>26.0.1</javafx.version>
+        <javafx.version>27</javafx.version>
         <main.class>br.opussistem.Main</main.class>
     </properties>
 
